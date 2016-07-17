@@ -27,7 +27,7 @@ let output (req:HttpListenerRequest) =
 
 let response (req : HttpListenerRequest) (resp : HttpListenerResponse) =
                       async {
-                            let item = Encoding.UTF8.GetBytes "Punyeta"
+                            let item = Encoding.UTF8.GetBytes (output req)
                             resp.ContentType <- "text/html"
                             resp.OutputStream.Write(item, 0, item.Length)
                             resp.OutputStream.Close()
