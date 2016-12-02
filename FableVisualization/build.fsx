@@ -10,8 +10,7 @@ let deployDir = "./deploy/"
 
 // Filesets
 let appReferences  =
-    !! "/**/*.csproj"
-    ++ "/**/*.fsproj"
+    !! "/src/server/*.fsproj"
 
 // version info
 let version = "0.1"  // or retrieve from CI server
