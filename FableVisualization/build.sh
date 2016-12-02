@@ -1,4 +1,6 @@
 #!/bin/bash
+(cd ./src/client && exec yarn build)
+
 if test "$OS" = "Windows_NT"
 then
   # use .Net

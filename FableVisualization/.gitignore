@@ -131,6 +131,13 @@ flycheck_*.el
 # projectiles files
 .projectile
 
+#Client
+src/client/dist/test/
+src/client/dist/umd/
+src/client/node_modules/
+
+src/client/npm-debug.log
+src/client/yarn-error.log
 
 
 

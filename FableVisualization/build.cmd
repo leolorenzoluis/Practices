@@ -1,6 +1,8 @@
 @echo off
 cls
 
+(cd ./src/client && exec yarn build)
+
 .paket\paket.bootstrapper.exe
 if errorlevel 1 (
   exit /b %errorlevel%
