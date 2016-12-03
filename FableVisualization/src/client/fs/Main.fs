@@ -30,14 +30,14 @@ let getIterationCount (p : Complex) =
 
 let iterCountToColor (i : int) : Color =
     let i = maxIter - i
-    { r = 0; g = i % 256; b = 200 * (i / 256); a = 255 }
+    { r = 0; g = i % 256; b = 100 * (i / 256); a = 255 }
 
 let getCoordColor (x : int, y : int) : Color =
     let p = { r = float x * (maxX - minX) / float width + minX
             ; i = float y * (maxY - minY) / float height + minY }
     let i = getIterationCount p
     iterCountToColor i
-
+ 
 let showSet() =
     let ctx = document.getElementsByTagName_canvas().[0].getContext_2d()
 
