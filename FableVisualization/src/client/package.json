@@ -14,5 +14,8 @@
     "build": "fable --target umd",
     "watch": "fable --target umd --watch",
     "test": "fable --target test"
+  },
+  "dependencies": {
+    "fable-import-d3": "0.0.4"
   }
 }

@@ -5,6 +5,10 @@
       "projFile": "./Main.fsproj",
       "rollup": {
         "dest": "./dist/umd/Main.js",
+        "external": ["d3"],
+        "globals": {
+          "d3": "d3"
+        },
         "format": "umd"
       }
     },

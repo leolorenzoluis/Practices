@@ -23,6 +23,7 @@
    !  File order is important in F#. Files cannot depend on anything below them.
    !-->
   <ItemGroup>
+    <Compile Include="./node_modules/fable-import-d3/Fable.Import.D3.fs" />
     <Compile Include="fs/Message.fs" />
     <Compile Include="fs/Main.fs" />
   </ItemGroup>
