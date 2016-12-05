@@ -10,7 +10,7 @@ open Fable.Import.Browser
 
 let random = new System.Random()
 
-let dataset = Array.init 5 (fun _ -> (random.Next(0,30) * 5))
+let dataset = Array.init 25 (fun _ -> (random.Next(0,50) * 5))
 
 let barHeight x = x * 5 
 
@@ -30,7 +30,8 @@ svg.selectAll("rect")
                 .attr("height", fun data _ _ -> U3.Case1 (float data))
                 .attr("x", fun _ x y -> printfn "X: %A Y: %A" x y
                                         U3.Case1 (x * (500./dataSetLength))) 
-                .attr("y", fun data _ _ -> U3.Case1 (100. - float data)) |> ignore
+                .attr("y", fun data _ _ -> U3.Case1 (100. - float data))
+                .attr("fill", fun data _ _ -> U3.Case2 (sprintf "rgb(0,0,%A)" (data * 5))) |> ignore
             
 
 
