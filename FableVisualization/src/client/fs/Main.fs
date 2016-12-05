@@ -10,7 +10,7 @@ open Fable.Import.Browser
 
 let random = new System.Random()
 
-let dataset = Array.init 25 (fun _ -> (random.Next(0,50) * 5))
+let dataset = Array.init 25 (fun _ -> (random.Next(3,25)))
 
 let barHeight x = x * 5 
 
@@ -27,14 +27,22 @@ svg.selectAll("rect")
 |> fun x -> (unbox<D3.Selection.Update<int>> x).enter()
 |> fun x -> x.append("rect")
 |> fun x -> x.attr("width", fun _ _ _ -> U3.Case1 (System.Math.Abs(500. / dataSetLength - barPadding)))
-                .attr("height", fun data _ _ -> U3.Case1 (float data))
+                .attr("height", fun data _ _ -> U3.Case1 (float data * 4.))
                 .attr("x", fun _ x y -> printfn "X: %A Y: %A" x y
                                         U3.Case1 (x * (500./dataSetLength))) 
-                .attr("y", fun data _ _ -> U3.Case1 (100. - float data))
-                .attr("fill", fun data _ _ -> U3.Case2 (sprintf "rgb(0,0,%A)" (data * 5))) |> ignore
+                .attr("y", fun data _ _ -> U3.Case1 (100. - float data * 4.))
+                .attr("fill", fun data _ _ -> U3.Case2 (sprintf "rgb(25,75,%A)" (data * 10))) |> ignore
             
 
-
+svg.selectAll("text")
+    .data(dataset)
+|> fun x -> (unbox<D3.Selection.Update<int>> x).enter()
+|> fun x -> x.append("text")
+|> fun x -> x.text(fun data _ _ -> U3.Case2 (string data))
+             .attr("x", fun _ x _ -> U3.Case1 (x * (500./dataSetLength))) 
+             .attr("y", fun data _ _ -> U3.Case1 (100. - (float data * 4.)))
+|> ignore
+               
 let data = D3.Globals.select("body").selectAll("div").data(dataset)
 
 
