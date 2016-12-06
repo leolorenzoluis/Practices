@@ -31,7 +31,7 @@ svg.selectAll("rect")
                 .attr("x", fun _ x y -> printfn "X: %A Y: %A" x y
                                         U3.Case1 (x * (500./dataSetLength))) 
                 .attr("y", fun data _ _ -> U3.Case1 (100. - float data * 4.))
-                .attr("fill", fun data _ _ -> U3.Case2 (sprintf "rgb(25,75,%A)" (data * 10))) |> ignore
+                .attr("fill", fun data _ _ -> U3.Case2 (sprintf "rgb(150,%A,150)" (data * 10))) |> ignore
             
 
 svg.selectAll("text")
