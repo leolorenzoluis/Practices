@@ -11,7 +11,7 @@ let getLinks (htmlDocument : HtmlDocument) =
 
 let filteredLinks (links : seq<string * string>) = 
             let x = links
-                    |> Seq.filter(fun (name, link) -> (link.StartsWith("/catalogue") && not (link.Contains("/catalogue/api")) && not (link.Contains("dataset/?"))) || link.Contains("googleapis"))
+                    |> Seq.filter(fun (name, link) -> (link.StartsWith("/catalogue") && not (link.Contains("/catalogue/api")) && not (link.Contains("dataset/?")) && not (link.EndsWith("/"))) || link.Contains("googleapis"))
             
             x
             |> Seq.toList
@@ -24,17 +24,19 @@ let test = "http://storage.googleapis.com/amt-dgph.appspot.com/uploads/FUQbsTdH0
 let y = (test.StartsWith("/catalogue") && not (test.Contains("/catalogue/api")) && not (test.Contains("dataset/?"))) || test.Contains("googleapis")
 
 let loadData (item : string * string)  = 
-  printfn "======= LOADING http://data.gov.ph/%A ========" (snd item)
-  HtmlDocument.Load("http://data.gov.ph" + (snd item))
+  let url = "http://data.gov.ph" + (snd item)
+  printfn "======= LOADING %A ========" url
+  HtmlDocument.Load(url)
   |> getLinks
   |> filteredLinks
                                                     
 
 let rec getData (item : string * string) = 
   match item with
-  | (x, y) -> for y in loadData(x,y) do
-                getData(y)
-  | _ -> printfn "DONE"
+  | (x , y) when x = "CSV" || x = "PDF" || x = "XML" || x = "JSON"
+                -> for y in loadData(x,y) do
+                              getData(y)
+  | _ -> printfn "Ignore"
     
 
 // Configure the type provider
@@ -43,6 +45,7 @@ type DataGovType =
 
 
 let dataGov = DataGovType.GetSample()
+
 
 let interestingLinks = 
   getLinks(dataGov.Html) 
