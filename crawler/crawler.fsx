@@ -2,6 +2,12 @@
 
 open System.Globalization
 open FSharp.Data
+open System.Collections.Generic
+
+let urls = new HashSet<string>()
+
+let urlsThatHaveBeenLoaded = new HashSet<string>()
+
 
 
 let getLinks (htmlDocument : HtmlDocument) = 
@@ -14,14 +20,15 @@ let filteredLinks (links : seq<string * string>) =
                     |> Seq.filter(fun (name, link) -> (link.StartsWith("/catalogue") && not (link.Contains("/catalogue/api")) && not (link.Contains("dataset/?")) && not (link.EndsWith("/"))) || link.Contains("googleapis"))
             
             x
+            |> Seq.map (fun (name, link) -> urls.Add(link))
             |> Seq.toList
             |> printfn "HELLO %A"
             x
 
 
-let test = "http://storage.googleapis.com/amt-dgph.appspot.com/uploads/FUQbsTdH0yKGigoLpIwV/budget_operation_statement_municipality_2000.csv"
+// let test = "http://storage.googleapis.com/amt-dgph.appspot.com/uploads/FUQbsTdH0yKGigoLpIwV/budget_operation_statement_municipality_2000.csv"
 
-let y = (test.StartsWith("/catalogue") && not (test.Contains("/catalogue/api")) && not (test.Contains("dataset/?"))) || test.Contains("googleapis")
+// let y = (test.StartsWith("/catalogue") && not (test.Contains("/catalogue/api")) && not (test.Contains("dataset/?"))) || test.Contains("googleapis")
 
 let loadData (item : string * string)  = 
   let url = "http://data.gov.ph" + (snd item)
@@ -47,9 +54,22 @@ type DataGovType =
 let dataGov = DataGovType.GetSample()
 
 
+
+let rec getData2 (item : string * string) =
+  let url = snd item
+  let isLoaded = urlsThatHaveBeenLoaded.Add(url)
+  match isLoaded with
+  | true -> printfn "Skipping, %A is already loaded" url
+  | false -> HtmlDocument.Load(url) |> getLinks |> Seq.map (getData2) 
+
 let interestingLinks = 
-  getLinks(dataGov.Html) 
-  |> filteredLinks
+  getLinks(dataGov.Html)
+  |> getData2 
+  //|> filteredLinks
 
 for a in interestingLinks do
   getData(a) |> ignore
+
+for url in urls do
+  // if url.Contains("google") then
+    printfn "%A" url
