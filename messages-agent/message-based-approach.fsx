@@ -63,7 +63,7 @@ let task = makeCountingTask MessageBasedCounter.Add 1
 Async.RunSynchronously task
 
 let messageExample5 = 
-    [1..5]
+    [1..1000]
         |> List.map (fun i -> makeCountingTask MessageBasedCounter.Add i)
         |> Async.Parallel
         |> Async.RunSynchronously
