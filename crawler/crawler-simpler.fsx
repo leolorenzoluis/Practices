@@ -14,7 +14,6 @@ let client = new WebClient()
 
 let crawlPage (client : WebClient) (pageUrl : string) =
   try
-    printfn "Crawling: %A" pageUrl
     let pageContent = client.DownloadString(pageUrl)
     let pageLinkMatches =
       Regex.Matches(
@@ -43,21 +42,24 @@ let test = crawlPage client "http://data.gov.ph/catalogue/dataset"
 
 let rec processLinks (links : seq<string>) (fileWriter : StreamWriter) =
     for url in links do
-        if url.StartsWith("/") then
-            if (urlsToProcess.Add url) then
-                crawlPage client ("http://data.gov.ph" + url)
+        let sanitizedUrl = url.Replace("amp=&amp;","")
+        if sanitizedUrl.StartsWith("/") then
+            if (urlsToProcess.Add sanitizedUrl) then
+                printfn "Url to process count: %A\nCrawling: %A" urlsToProcess.Count sanitizedUrl
+                crawlPage client ("http://data.gov.ph" + sanitizedUrl)
                 |> fun urls -> processLinks urls fileWriter
         else
-            let isUrlNew = urlsOutsideHost.Add url
+            let isUrlNew = urlsOutsideHost.Add sanitizedUrl
             if isUrlNew then
-                async {
-                    printfn "=== writing === %A" url
-                    let task = fileWriter.WriteLineAsync (url)
-                    do! task |> Async.AwaitIAsyncResult |> Async.Ignore
-                    if task.IsFaulted then raise task.Exception
-                    return ()
-                }
-                |> ignore
+                // async {
+                //     printfn "=== writing === %A" sanitizedUrl
+                //     let task = fileWriter.WriteLineAsync (sanitizedUrl)
+                //     do! task |> Async.AwaitIAsyncResult |> Async.Ignore
+                //     if task.IsFaulted then raise task.Exception
+                //     return ()
+                // }
+                // |> Async.Start
+                fileWriter.WriteLine (sanitizedUrl) |> ignore
                 
                 
 
@@ -65,10 +67,3 @@ File.Delete("urls.txt")
 let fileWriter = new StreamWriter("urls.txt")
 fileWriter.AutoFlush <- true
 #time
-processLinks test fileWriter
-#time
-urlsToProcess.Count
-urlsOutsideHost.Count
-
-urlsOutsideHost|>Seq.toList
-test
