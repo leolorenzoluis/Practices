@@ -11,6 +11,8 @@ let urls = File.ReadLines("urls-to-process.txt")
 //let queue = new ConcurrentQueue<string>(urls)
 
 let urlsOutsideHost = new HashSet<string>()
+let fasterAddMaybe = new ConcurrentDictionary<string,byte>()
+
 [<Literal>]
 let RegexPattern = @"<a\s+(?:[^>]*?\s+)?href=""([^#""]*)"
 let client = new WebClient()
@@ -75,9 +77,9 @@ let crawlPage2 url =
                 let matches = pageLinkMatches
                                 |> Seq.cast<Match>
                                 |> Seq.map (fun m -> (m.Groups.Item(1).Value))
-
+                
                 for x in matches do
-                    urlsOutsideHost.Add x |> ignore 
+                    fasterAddMaybe.TryAdd(x, new byte()) |> ignore 
                 
             with | message -> printfn "ERROR: %A" message 
      }
@@ -94,7 +96,7 @@ let test = new HashSet<string>(urls)
 #time
 test
 |> Seq.toList
-|> List.map crawlPage2
+|> Seq.map crawlPage2
 |> Async.Parallel
 |> Async.RunSynchronously
 #time
@@ -109,11 +111,3 @@ test
 
 
 
-
-agent.Post(Message.CreateMessage("ABC"))
-agent.Post(Message.CreateMessage("XYZ"))
-
-urlsOutsideHost.Count
-queue.Count
-
-Seq.length urls
