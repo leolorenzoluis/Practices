@@ -12,13 +12,15 @@ open System.IO
 
 let client = new WebClient()
 
+[<Literal>]
+let RegexPattern = @"<a\s+(?:[^>]*?\s+)?href=""([^#""]*)"
 let crawlPage (client : WebClient) (pageUrl : string) =
   try
     let pageContent = client.DownloadString(pageUrl)
     let pageLinkMatches =
       Regex.Matches(
         pageContent,
-        "a href=['\"](.[^'\"]+)['\"]",
+        RegexPattern,
         RegexOptions.Compiled)
 
     pageLinkMatches
@@ -59,7 +61,8 @@ let rec processLinks (links : seq<string>) (fileWriter : StreamWriter) =
                 //     return ()
                 // }
                 // |> Async.Start
-                fileWriter.WriteLine (sanitizedUrl) |> ignore
+                if not <| sanitizedUrl.Contains("share") then
+                    fileWriter.WriteLine (sanitizedUrl) |> ignore
                 
                 
 
@@ -67,3 +70,14 @@ File.Delete("urls.txt")
 let fileWriter = new StreamWriter("urls.txt")
 fileWriter.AutoFlush <- true
 #time
+processLinks test fileWriter
+#time
+
+
+let fileWriter2 = new StreamWriter("urls-to-process.txt")
+fileWriter2.AutoFlush <- true
+#time
+for x in urlsToProcess do
+    fileWriter2.WriteLine x
+#time
+urlsOutsideHost.Count
