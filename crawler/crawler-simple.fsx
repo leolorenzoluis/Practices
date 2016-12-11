@@ -15,8 +15,8 @@ page.</returns>
 *)
 let crawlPage (client : WebClient) (pageUrl : string) =
   try
+    printfn "Crawling: %A" pageUrl
     let pageContent = client.DownloadString(pageUrl)
-
     let pageLinkMatches =
       Regex.Matches(
         pageContent,
@@ -27,7 +27,8 @@ let crawlPage (client : WebClient) (pageUrl : string) =
     |> Seq.cast<Match>
     |> Seq.map (fun m -> m.Groups.Item(1).Value)
 
-  with | _ -> Seq.empty
+  with | message -> printfn "ERROR: %A" message
+                    Seq.empty
 
 (**
 <summary>Crawl a given site to a given depth and print out the links
@@ -47,14 +48,12 @@ crawling.</param>
 <returns>Nothing.</returns>
 *)
 let rec crawlSite client curDepth moreDepth siteUrl =
-  if moreDepth > 0
-    then
-      let links = crawlPage client siteUrl
-      let prefix = String.replicate curDepth "-"
-
-      for link in links do
-        printfn "%s %s" prefix link
-        crawlSite client (curDepth + 1) (moreDepth - 1) link
+    if moreDepth > 0 then
+        let links = crawlPage client siteUrl
+        let prefix = String.replicate curDepth "-"
+        for link in links do
+            printfn "%s %s" prefix link
+            crawlSite client (curDepth + 1) (moreDepth - 1) link
 
 (**
 <summary>Crawl a given site to a given depth and print out the links
@@ -79,10 +78,12 @@ let main argv =
   | [| depthStr; siteUrl |] ->
     try
       let depth = System.Int32.Parse(depthStr)
+      printfn "Depth is %A" depth
       match System.Uri.CheckHostName(siteUrl) with
       | System.UriHostNameType.Basic
-      | System.UriHostNameType.Unknown -> usage ()
+      //| System.UriHostNameType.Unknown -> usage ()
       | _ ->
+        printfn "Starting to crawl..."
         crawl depth siteUrl
         0
 
@@ -90,5 +91,5 @@ let main argv =
 
   | _ -> usage ()
 
-let blah = [| "10";"data.gov.ph"|]
+let blah = [| "2";"http://data.gov.ph"|]
 main blah
