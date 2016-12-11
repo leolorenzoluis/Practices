@@ -11,8 +11,6 @@ let urls = File.ReadLines("urls-to-process.txt")
 //let queue = new ConcurrentQueue<string>(urls)
 
 let urlsOutsideHost = new HashSet<string>()
-let fasterAddMaybe = new ConcurrentDictionary<string,byte>()
-
 [<Literal>]
 let RegexPattern = @"<a\s+(?:[^>]*?\s+)?href=""([^#""]*)"
 let client = new WebClient()
@@ -61,6 +59,8 @@ let crawlPage (client : WebClient) (pageUrl : string) =
 //                 yield agent
 //         ]
 
+let concurrentBag = new ConcurrentBag<string>()
+
 let crawlPage2 url =
      async { 
             try 
@@ -77,9 +77,10 @@ let crawlPage2 url =
                 let matches = pageLinkMatches
                                 |> Seq.cast<Match>
                                 |> Seq.map (fun m -> (m.Groups.Item(1).Value))
-                
+
                 for x in matches do
-                    fasterAddMaybe.TryAdd(x, new byte()) |> ignore 
+                    printfn "Urls outside host count: %A" concurrentBag.Count
+                    concurrentBag.Add x |> ignore 
                 
             with | message -> printfn "ERROR: %A" message 
      }
@@ -96,7 +97,7 @@ let test = new HashSet<string>(urls)
 #time
 test
 |> Seq.toList
-|> Seq.map crawlPage2
+|> List.map crawlPage2
 |> Async.Parallel
 |> Async.RunSynchronously
 #time
@@ -109,5 +110,30 @@ test
 //                             | _ -> printfn "Done")
     
 
+let f = new FileInfo("urls-to-process-using-concurrent-bag-distinct.txt")
+f.Length
 
 
+let fileWriter2 = new StreamWriter("urls-to-process-using-concurrent-bag-distinct-interesting.txt")
+fileWriter2.AutoFlush <- true
+
+
+let interestingFiles (url : string) = 
+ url.EndsWith("json") || url.EndsWith("csv") || url.EndsWith("pdf") || url.EndsWith("htm") || url.EndsWith("html")
+
+#time
+concurrentBag
+  |> Seq.distinct
+  |> Seq.filter(fun x -> not (x.Contains("share")) && interestingFiles(x))
+  |> Seq.map fileWriter2.WriteLine
+  |> Seq.toList
+#time
+urlsOutsideHost.Count
+
+agent.Post(Message.CreateMessage("ABC"))
+agent.Post(Message.CreateMessage("XYZ"))
+
+urlsOutsideHost.Count
+queue.Count
+
+Seq.length urls
